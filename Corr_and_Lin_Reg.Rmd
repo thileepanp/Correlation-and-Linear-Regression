@@ -1,0 +1,33 @@
+---
+title: "Correlation and Linear Regression"
+author: "Thileepan Paulraj"
+date: "21 December 2018"
+output: pdf_document
+---
+
+# Correlation
+
+Two variables are said to be correlated when they vary together. An unit increase in one variable should result in an unit increase or decrease in another variable for the variables to be correlated. 
+
+Let's take the cars data set from R and see how it's mileage and weight variables are correlated. Let's use pearson's correlation for that. 
+
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+cor.test(mtcars$mpg, mtcars$wt)
+```
+
+
+Correlation coefficients are usually between -1 and +1. Here our correlation coefficient is high, which indicates high correlation between the variables. the negative sign indicates a negative correlation which means as the weighht of the car increases it's mileage decreases. 
+
+Let's visualize the correlation also. 
+
+```{r}
+ggplot(data =mtcars, aes(x = mtcars$wt, y = mtcars$mpg)) + geom_point()
+```
+
+From the plot we can clearly see that as the weight of the car increases it's mileage decreases.
