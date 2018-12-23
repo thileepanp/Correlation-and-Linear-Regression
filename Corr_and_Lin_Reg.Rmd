@@ -1,13 +1,13 @@
 ---
-title: "Correlation and Linear Regression"
+title: "Correlation, Causation and Linear Regression"
 author: "Thileepan Paulraj"
 date: "21 December 2018"
 output: pdf_document
 ---
 
-# Correlation
+# Correlation and Causation
 
-Two variables are said to be correlated when they vary together. An unit increase in one variable should result in an unit increase or decrease in another variable for the variables to be correlated. 
+Two variables are said to be correlated when they vary together. An unit increase in one variable should result in an unit increase or decrease in another variable for the variables to be correlated. Variables could also be linearly and non-linearly (parabolic correlation, exponential correlation) correlated.
 
 Let's take the cars data set from R and see how it's mileage and weight variables are correlated. Let's use pearson's correlation for that. 
 
@@ -22,7 +22,7 @@ cor.test(mtcars$mpg, mtcars$wt)
 ```
 
 
-Correlation coefficients are usually between -1 and +1. Here our correlation coefficient is high, which indicates high correlation between the variables. the negative sign indicates a negative correlation which means as the weighht of the car increases it's mileage decreases. 
+Correlation coefficients are usually between -1 and +1. Here our correlation coefficient is high, which indicates high correlation between the variables. the negative sign indicates a negative correlation which means as the weight of the car increases it's mileage decreases. 
 
 Let's visualize the correlation also. 
 
@@ -31,3 +31,94 @@ ggplot(data =mtcars, aes(x = mtcars$wt, y = mtcars$mpg)) + geom_point()
 ```
 
 From the plot we can clearly see that as the weight of the car increases it's mileage decreases.
+
+#Causation
+
+When two variables vary together it doesn't mean that one variable is the cause of the variation in the other variable. In some cases, however one the change in one variable might be the cause for the change in the other variable. An example of this could be the rise in temperature during summer and the number of hours of usage of air conditioners. 
+
+#Regression 
+
+Correlation measures the strength of association between two variables but regression fits a linear relationship between a set of predictor variables and the output. Using this linear relationship we can predict future values of the output variable if we have our predictor variables.
+
+
+#Linear Regression Example
+
+Let's take a real life data set and apply linear regression to it to predict future results. I will be using the loans data set to predict the **interest rate** given to each customer. 
+
+
+
+```{r Reading data}
+train_data  = read.csv('loan_data_train.csv', stringsAsFactors = F)
+test_data = read.csv('loan_data_test.csv', stringsAsFactors = F)
+```
+
+```{r}
+glimpse(train_data)
+dim(train_data)
+glimpse(test_data)
+dim(test_data)
+```
+
+
+```{r}
+dim(train_data)
+
+dim(test_data)
+```
+
+As we can see from the dimensions of the train and test data we can see the test data has one variable less, this is the variable **Interest.Rate** which we have to predict.
+
+#Data Pre Processing
+
+Before we start any kind of machine learning modeling, the data needs to be pre-processed. Since we have two different data sets (train and test) we can combine them together and do the pre processing. 
+
+In order to combine them together both the data sets needs to be of the same dimension. So let's add a variable called **Interest.rate** with NA values in the test data set also. 
+
+```{r}
+test_data$Interest.Rate = NA
+```
+
+Now, both the data sets are of the same dimension and we could combine them easily, but we need some indication to differentiate our training set from test set. Let's add a variable called **data** to both the data sets which will be equal to **train** for training data set and **test** for test data set. 
+
+```{r}
+train_data$data = 'train'
+test_data$data = 'test'
+```
+
+Now, let's combine the data sets
+
+```{r}
+all_data = rbind(train_data, test_data)
+glimpse(all_data)
+```
+##Converting characters to numeric variables
+
+From the table above, we can see that some numeric variables are represented as character variables in the data set. Let's try to convert them back to numeric first
+
+```{r}
+all_data = all_data %>%
+  mutate(Interest.Rate = as.numeric(gsub("%", "", Interest.Rate)),
+  Amount.Requested = as.numeric(Amount.Requested),
+  Amount.Funded.By.Investors = as.numeric(Amount.Funded.By.Investors),
+  Loan.Length = as.numeric(gsub("months", "", Loan.Length)),
+  Debt.To.Income.Ratio = as.numeric(gsub("%", "", Debt.To.Income.Ratio)),
+  Revolving.CREDIT.Balance = as.numeric(Revolving.CREDIT.Balance),
+  Open.CREDIT.Lines = as.numeric(Open.CREDIT.Lines))
+
+glimpse(all_data)
+```
+
+##Converting a range variable (FICO.Range) to a numeric value
+
+```{r}
+all_data = all_data %>%
+  mutate( f1 = as.numeric(substr(FICO.Range, 1,3)),
+          f2 = as.numeric(substr(FICO.Range, 5,7)),
+          fico = (f1+f2)/2
+        ) %>%
+  select(-FICO.Range, -f1, -f2)
+
+glimpse(all_data)
+```
+
+
