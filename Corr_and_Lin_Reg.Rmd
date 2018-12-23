@@ -121,4 +121,18 @@ all_data = all_data %>%
 glimpse(all_data)
 ```
 
+##Converting Employment length variable into a numeric variable. 
+
+```{r}
+all_data = all_data %>%
+  mutate( el = ifelse(substr(Employment.Length, 1,2) == 10, 10, Employment.Length),
+          el = ifelse(substr(Employment.Length, 1,1) == "<", 0, el),
+          el = gsub("years", "", el),
+          el = gsub("years", "", el),
+          el = as.numeric(el)
+          ) %>%
+  select(-Employment.Length)
+
+glimpse(all_data)
+```
 
